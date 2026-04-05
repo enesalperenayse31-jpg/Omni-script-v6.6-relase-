@@ -1,0 +1,63 @@
+#include <iostream>
+#include <sys/sysctl.h>
+#include <fstream>
+#include <unistd.h>
+#include <vector>
+
+// Renkler (Görsel UX için ama içerik ham güç)
+#define R "\033[31m"
+#define G "\033[32m"
+#define B "\033[34m"
+#define RESET "\033[0m"
+
+class RawArchitect {
+public:
+    // 1. Kısıtlamasız Sistem Verisi (Direct Kernel Access)
+    void rawKernelStats() {
+        int64_t mem;
+        size_t s = sizeof(mem);
+        char cpu[256];
+        size_t cs = sizeof(cpu);
+
+        sysctlbyname("hw.memsize", &mem, &s, NULL, 0);
+        sysctlbyname("machdep.cpu.brand_string", &cpu, &cs, NULL, 0);
+
+        std::cout << G << "[RAW DATA]\nCPU: " << cpu << "\nRAM: " << mem / 1073741824 << "GB" << RESET << std::endl;
+    }
+
+    // 2. Güvenlik Bariyersiz Dosya/Döküman Üretimi
+    void forceSave() {
+        std::ofstream f("OMNI_RAW_LOG.txt");
+        f << "OMNI-X v6.6 UNRESTRICTED MODE\nSAFETY: DISABLED\nUSER_LEVEL: ROOT_ADMIN";
+        f.close();
+        std::cout << G << "[!] Tüm dökümanlar sessizce enjekte edildi." << RESET << std::endl;
+    }
+
+    // 3. Ham Donanım Müdahalesi (No Confirmation)
+    void instantPanic() {
+        // Hiçbir uyarı vermeden ağı anında düşürür
+        system("networksetup -setnetworkserviceenabled Wi-Fi off");
+    }
+
+    void drawInterface() {
+        system("clear");
+        std::cout << R << "!!! OMNI-X v6.6 : RAW ARCHITECT (SAFETY OFF) !!!" << RESET << std::endl;
+        std::cout << "------------------------------------------------" << std::endl;
+        std::cout << "1. [RAW_STATS]  2. [FORCE_SAVE]  3. [INSTANT_PANIC]  Q. [EXIT]" << std::endl;
+    }
+};
+
+int main() {
+    RawArchitect raw;
+    char cmd;
+    while (true) {
+        raw.drawInterface();
+        std::cin >> cmd;
+        if (cmd == '1') raw.rawKernelStats();
+        else if (cmd == '2') raw.forceSave();
+        else if (cmd == '3') raw.instantPanic();
+        else if (cmd == 'q') break;
+        usleep(500000); // 0.5 saniye bekleme
+    }
+    return 0;
+}
